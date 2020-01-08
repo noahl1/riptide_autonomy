@@ -2,9 +2,11 @@
 import rospy
 import actionlib
 
-from riptide_msgs.msg import AttitudeCommand, Imu, LinearCommand
+from riptide_msgs.msg import AttitudeCommand, LinearCommand
+from sensor_msgs.msg import Imu
 from std_msgs.msg import Float32, Int8
 import riptide_autonomy.msg
+from tf.transformations import euler_from_quaternion
 
 import time
 import math
@@ -31,6 +33,11 @@ class Search(object):
         self._as.start()
         self.timer = rospy.Timer(rospy.Duration(0.05), lambda _: checkPreempted(self._as))
 
+    def imuToEuler(self, msg):
+        quat = msg.orientation
+        quat = [quat.x, quat.y, quat.z, quat.w]
+        return np.array(euler_from_quaternion(quat)) * 180 / math.pi
+
     def camCb(self, msg):
         self.camera = msg.data
     
@@ -39,13 +46,14 @@ class Search(object):
         self.start_ang = goal.heading
         self.startTime = time.time()
 
-        imuSub = rospy.Subscriber("/state/imu", Imu, self.imuCb)
+        imuSub = rospy.Subscriber("/imu/data", Imu, self.imuCb)
         waitAction(goal.obj, 5).wait_for_result()
         # Keep the yaw angle for aligning
         
 
         imuSub.unregister()
-        self.yawPub.publish(rospy.wait_for_message("/state/imu", Imu).rpy_deg.z, AttitudeCommand.POSITION)
+        y = self.imuToEuler(rospy.wait_for_message("/imu/data", Imu))[2]
+        self.yawPub.publish(y, AttitudeCommand.POSITION)
         self.xPub.publish(0, LinearCommand.FORCE)
         self.yPub.publish(0, LinearCommand.FORCE)
         self.rollPub.publish(0, AttitudeCommand.POSITION)
@@ -53,14 +61,15 @@ class Search(object):
         self._as.set_succeeded()
 
     def imuCb(self, msg):
+        euler = self.imuToEuler(msg)
         self.position = 20 * math.sin(math.pi / 3 * (time.time() - self.startTime))
         if self.camera == 0:
             self.yawPub.publish(angleDiff(self.position, -self.start_ang), AttitudeCommand.POSITION)
         else:
             self.rollPub.publish(angleDiff(self.position, 0), AttitudeCommand.POSITION)
 
-        sy = math.sin(angleDiff(msg.rpy_deg.z, self.start_ang) * math.pi / 180)
-        cy = math.cos(angleDiff(msg.rpy_deg.z, self.start_ang) * math.pi / 180)
+        sy = math.sin(angleDiff(euler[2], self.start_ang) * math.pi / 180)
+        cy = math.cos(angleDiff(euler[2], self.start_ang) * math.pi / 180)
 
         self.xPub.publish(self.drive_force * cy, LinearCommand.FORCE)
         self.yPub.publish(self.drive_force * sy, LinearCommand.FORCE)

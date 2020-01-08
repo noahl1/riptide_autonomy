@@ -2,9 +2,12 @@
 import rospy
 import actionlib
 
-from riptide_msgs.msg import LinearCommand, AlignmentCommand, Imu
+from riptide_msgs.msg import LinearCommand, AlignmentCommand
+from sensor_msgs.msg import Imu
 import riptide_autonomy.msg
+from tf.transformations import euler_from_quaternion
 
+import math
 from actionTools import *
 
 def angleAdd(a, b):
@@ -41,7 +44,9 @@ class BuoyTaskAction(object):
 
         rospy.loginfo("Backing up")
 
-        yaw = rospy.wait_for_message("/state/imu", Imu).rpy_deg.z
+        quat = rospy.wait_for_message("/imu/data", Imu).orientation
+        quat = [quat.x, quat.y, quat.z, quat.w]
+        yaw = euler_from_quaternion(quat)[2] * 180 / math.pi
         if goal.isCutieLeft:
             moveAction(-0.5, -1.5).wait_for_result()
             moveAction(3, 0).wait_for_result()
