@@ -13,8 +13,8 @@ import time
 class GarlicTaskAction(object):
 
     def __init__(self):
-        self.dropperPub = rospy.Publisher("/command/drop", Int8, queue_size=1)
-        self.xPub = rospy.Publisher("/command/x", LinearCommand, queue_size=1)
+        self.dropperPub = rospy.Publisher("command/drop", Int8, queue_size=1)
+        self.xPub = rospy.Publisher("command/x", LinearCommand, queue_size=1)
         self._as = actionlib.SimpleActionServer(
             "garlic_task", riptide_autonomy.msg.GarlicTaskAction, execute_cb=self.execute_cb, auto_start=False)
         self._as.start()

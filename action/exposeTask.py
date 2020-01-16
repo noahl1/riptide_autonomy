@@ -14,10 +14,10 @@ class ExposeTaskAction(object):
     drive_force = 15
     
     def __init__(self):
-        self.xPub = rospy.Publisher("/command/x", LinearCommand, queue_size=1)
-        self.yPub = rospy.Publisher("/command/y", LinearCommand, queue_size=1)
-        self.rollPub = rospy.Publisher("/command/roll", AttitudeCommand, queue_size=5)
-        self.cameraPub = rospy.Publisher("/command/camera", Int8, queue_size=1)
+        self.xPub = rospy.Publisher("command/x", LinearCommand, queue_size=1)
+        self.yPub = rospy.Publisher("command/y", LinearCommand, queue_size=1)
+        self.rollPub = rospy.Publisher("command/roll", AttitudeCommand, queue_size=5)
+        self.cameraPub = rospy.Publisher("command/camera", Int8, queue_size=1)
 
         self._as = actionlib.SimpleActionServer(
             "expose_task", riptide_autonomy.msg.ExposeTaskAction, execute_cb=self.execute_cb, auto_start=False)

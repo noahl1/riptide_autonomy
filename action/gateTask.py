@@ -10,8 +10,8 @@ from actionTools import *
 class GateTaskAction(object):
 
     def __init__(self):
-        self.xPub = rospy.Publisher("/command/x", LinearCommand, queue_size=1)
-        self.alignPub = rospy.Publisher("/command/alignment", AlignmentCommand, queue_size=1)
+        self.xPub = rospy.Publisher("command/x", LinearCommand, queue_size=1)
+        self.alignPub = rospy.Publisher("command/alignment", AlignmentCommand, queue_size=1)
         self._as = actionlib.SimpleActionServer(
             "gate_task", riptide_autonomy.msg.GateTaskAction, execute_cb=self.execute_cb, auto_start=False)
         self._as.start()
@@ -24,7 +24,7 @@ class GateTaskAction(object):
         distance = getResult(getDistanceAction("Gate")).distance
         self.alignPub.publish("", 0)
         rospy.sleep(0.1)
-        depthMsg = rospy.wait_for_message("/state/depth", Depth)
+        depthMsg = rospy.wait_for_message("state/depth", Depth)
         depthAction(depthMsg.depth + .4).wait_for_result()
         # Get 2.0 meters away from the gate
         if goal.isLeft:

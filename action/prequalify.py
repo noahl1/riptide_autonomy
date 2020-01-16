@@ -25,17 +25,17 @@ class PrequalifyAction(object):
 
     def __init__(self):
         self.depthPub = rospy.Publisher(
-            "/command/depth", DepthCommand, queue_size=5)
+            "command/depth", DepthCommand, queue_size=5)
         self.rollPub = rospy.Publisher(
-            "/command/roll", AttitudeCommand, queue_size=5)
+            "command/roll", AttitudeCommand, queue_size=5)
         self.pitchPub = rospy.Publisher(
-            "/command/pitch", AttitudeCommand, queue_size=5)
+            "command/pitch", AttitudeCommand, queue_size=5)
         self.yawPub = rospy.Publisher(
-            "/command/yaw", AttitudeCommand, queue_size=5)
+            "command/yaw", AttitudeCommand, queue_size=5)
         self.alignmentPub = rospy.Publisher(
-            "/command/alignment", AlignmentCommand, queue_size=5)
+            "command/alignment", AlignmentCommand, queue_size=5)
         self.forcePub = rospy.Publisher(
-            "/command/force_x", Float64, queue_size=5)
+            "command/force_x", Float64, queue_size=5)
 
         self._as = actionlib.SimpleActionServer(
             "prequalify", riptide_autonomy.msg.PrequalifyAction, execute_cb=self.execute_cb, auto_start=False)
@@ -85,7 +85,7 @@ class PrequalifyAction(object):
     def execute_cb(self, goal):
 
         rospy.loginfo("Waiting for killswitch")
-        while not rospy.wait_for_message("/state/switches", SwitchState).kill:
+        while not rospy.wait_for_message("state/switches", SwitchState).kill:
             rospy.sleep(0.2)
 
         rospy.sleep(5)
@@ -109,7 +109,7 @@ class PrequalifyAction(object):
         count = 0
         lastTime = time.time()
         while count < 5:
-            rospy.wait_for_message("/state/object", Object)
+            rospy.wait_for_message("state/object", Object)
             diff = time.time() - lastTime
             if diff < 0.3:
                 count += 1
@@ -123,7 +123,7 @@ class PrequalifyAction(object):
         self.alignmentPub.publish(cmd)
 
         # Wait until aligned
-        while abs(rospy.wait_for_message("/status/controls/linear", ControlStatusLinear).x.error) > .2:
+        while abs(rospy.wait_for_message("status/controls/linear", ControlStatusLinear).x.error) > .2:
             rospy.sleep(0.05)
 
         rospy.loginfo("Going around")

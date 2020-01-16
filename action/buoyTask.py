@@ -18,9 +18,9 @@ class BuoyTaskAction(object):
     threeBuoySides = ["Garlic", "Wolf"]
 
     def __init__(self):
-        self.xPub = rospy.Publisher("/command/x", LinearCommand, queue_size=1)
-        self.yPub = rospy.Publisher("/command/y", LinearCommand, queue_size=1)
-        self.alignPub = rospy.Publisher("/command/alignment", AlignmentCommand, queue_size=1)
+        self.xPub = rospy.Publisher("command/x", LinearCommand, queue_size=1)
+        self.yPub = rospy.Publisher("command/y", LinearCommand, queue_size=1)
+        self.alignPub = rospy.Publisher("command/alignment", AlignmentCommand, queue_size=1)
         self._as = actionlib.SimpleActionServer(
             "buoy_task", riptide_autonomy.msg.BuoyTaskAction, execute_cb=self.execute_cb, auto_start=False)
         self._as.start()
@@ -44,7 +44,7 @@ class BuoyTaskAction(object):
 
         rospy.loginfo("Backing up")
 
-        quat = rospy.wait_for_message("/imu/data", Imu).orientation
+        quat = rospy.wait_for_message("imu/data", Imu).orientation
         quat = [quat.x, quat.y, quat.z, quat.w]
         yaw = euler_from_quaternion(quat)[2] * 180 / math.pi
         if goal.isCutieLeft:

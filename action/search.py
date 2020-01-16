@@ -21,12 +21,12 @@ class Search(object):
     camera = 0
 
     def __init__(self):
-        self.xPub = rospy.Publisher("/command/x", LinearCommand, queue_size=1)
-        self.yPub = rospy.Publisher("/command/y", LinearCommand, queue_size=1)
-        self.yawPub = rospy.Publisher("/command/yaw", AttitudeCommand, queue_size=5)
-        self.rollPub = rospy.Publisher("/command/roll", AttitudeCommand, queue_size=5)
+        self.xPub = rospy.Publisher("command/x", LinearCommand, queue_size=1)
+        self.yPub = rospy.Publisher("command/y", LinearCommand, queue_size=1)
+        self.yawPub = rospy.Publisher("command/yaw", AttitudeCommand, queue_size=5)
+        self.rollPub = rospy.Publisher("command/roll", AttitudeCommand, queue_size=5)
 
-        self.cameraSub = rospy.Subscriber("/command/camera", Int8, self.camCb)
+        self.cameraSub = rospy.Subscriber("command/camera", Int8, self.camCb)
 
         self._as = actionlib.SimpleActionServer(
             "search", riptide_autonomy.msg.SearchAction, execute_cb=self.execute_cb, auto_start=False)
@@ -46,13 +46,13 @@ class Search(object):
         self.start_ang = goal.heading
         self.startTime = time.time()
 
-        imuSub = rospy.Subscriber("/imu/data", Imu, self.imuCb)
+        imuSub = rospy.Subscriber("imu/data", Imu, self.imuCb)
         waitAction(goal.obj, 5).wait_for_result()
         # Keep the yaw angle for aligning
         
 
         imuSub.unregister()
-        y = self.imuToEuler(rospy.wait_for_message("/imu/data", Imu))[2]
+        y = self.imuToEuler(rospy.wait_for_message("imu/data", Imu))[2]
         self.yawPub.publish(y, AttitudeCommand.POSITION)
         self.xPub.publish(0, LinearCommand.FORCE)
         self.yPub.publish(0, LinearCommand.FORCE)

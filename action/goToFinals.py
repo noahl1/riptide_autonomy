@@ -38,9 +38,9 @@ class GoToFinalsAction(object):
 
     def __init__(self):
         self.resetPub = rospy.Publisher(
-            "/controls/reset", ResetControls, queue_size=1)
+            "controls/reset", ResetControls, queue_size=1)
         self.camPub = rospy.Publisher(
-            "/command/camera", Int8, queue_size=1)
+            "command/camera", Int8, queue_size=1)
 
         self._as = actionlib.SimpleActionServer(
             "go_to_finals", riptide_autonomy.msg.GoToFinalsAction, execute_cb=self.execute_cb, auto_start=False)
@@ -66,7 +66,7 @@ class GoToFinalsAction(object):
     def execute_cb(self, goal):
         rospy.loginfo("Wait for kill switch")
 
-        while not rospy.wait_for_message("/state/switches", SwitchState).kill:
+        while not rospy.wait_for_message("state/switches", SwitchState).kill:
             rospy.sleep(0.1)
 
         rospy.sleep(5.0)
