@@ -29,9 +29,8 @@ class BuoyTaskAction(object):
 
     def execute_cb(self, goal):
         rospy.loginfo("Starting Buoy task")
-        alignAction("Cutie", .3, True).wait_for_result()
-        distance = getResult(getDistanceAction("Cutie")).distance
-        self.alignPub.publish("",0)
+        alignAction("Cutie", .3).wait_for_result()
+        distance = getResult(getDistanceAction("Cutie")).distance - 0.15
         moveAction(distance, -.2).wait_for_result()
         if self._as.is_preempt_requested():
             rospy.loginfo('Preempted Buoy Task')
@@ -49,18 +48,18 @@ class BuoyTaskAction(object):
         yaw = euler_from_quaternion(quat)[2] * 180 / math.pi
         if goal.isCutieLeft:
             moveAction(-0.5, -1.5).wait_for_result()
-            moveAction(3, 0).wait_for_result()
+            moveAction(3.5, 0).wait_for_result()
             yawAction(angleAdd(yaw, 180)).wait_for_result()
             self.yPub.publish(-20, LinearCommand.FORCE)
         else:
             moveAction(-0.5, 1.5).wait_for_result()
-            moveAction(3, 0).wait_for_result()
+            moveAction(3.5, 0).wait_for_result()
             yawAction(angleAdd(yaw, 180)).wait_for_result()
             self.yPub.publish(20, LinearCommand.FORCE)
         
-        waitAction(goal.backside, 3).wait_for_result()
+        waitAction(goal.backside, 5).wait_for_result()
         alignAction(goal.backside, .3).wait_for_result()
-        distance = getResult(getDistanceAction(goal.backside)).distance
+        distance = getResult(getDistanceAction(goal.backside)).distance - 0.15
         moveAction(distance, -.2).wait_for_result()
         if self._as.is_preempt_requested():
             rospy.loginfo('Preempted Buoy Task')
