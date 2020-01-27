@@ -3,7 +3,7 @@ import rospy
 import actionlib
 
 from riptide_msgs.msg import AttitudeCommand, LinearCommand
-from sensor_msgs.msg import Imu
+from nav_msgs.msg import Odometry
 from std_msgs.msg import Float32, Int8
 import riptide_autonomy.msg
 from tf.transformations import euler_from_quaternion
@@ -46,13 +46,13 @@ class Search(object):
         self.start_ang = goal.heading
         self.startTime = time.time()
 
-        imuSub = rospy.Subscriber("imu/data", Imu, self.imuCb)
+        odomSub = rospy.Subscriber("odometry/filtered", Odometry, self.odomCb)
         waitAction(goal.obj, 5).wait_for_result()
         # Keep the yaw angle for aligning
         
 
-        imuSub.unregister()
-        y = self.imuToEuler(rospy.wait_for_message("imu/data", Imu))[2]
+        odomSub.unregister()
+        y = self.imuToEuler(rospy.wait_for_message("odometry/filtered", Odometry).pose.pose.orientation)[2]
         self.yawPub.publish(y, AttitudeCommand.POSITION)
         self.xPub.publish(0, LinearCommand.FORCE)
         self.yPub.publish(0, LinearCommand.FORCE)
@@ -60,8 +60,8 @@ class Search(object):
 
         self._as.set_succeeded()
 
-    def imuCb(self, msg):
-        euler = self.imuToEuler(msg)
+    def odomCb(self, msg):
+        euler = self.imuToEuler(msg.pose.pose.orientation)
         self.position = 20 * math.sin(math.pi / 3 * (time.time() - self.startTime))
         if self.camera == 0:
             self.yawPub.publish(angleDiff(self.position, -self.start_ang), AttitudeCommand.POSITION)

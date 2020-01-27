@@ -2,7 +2,8 @@
 import rospy
 import actionlib
 
-from riptide_msgs.msg import LinearCommand, AlignmentCommand, Depth
+from riptide_msgs.msg import LinearCommand, AlignmentCommand
+from nav_msgs.msg import Odometry
 from std_msgs.msg import Bool, Int8
 from darknet_ros_msgs.msg import BoundingBoxes
 import riptide_autonomy.msg
@@ -37,30 +38,30 @@ class DecapTaskAction(object):
                 self._as.set_preempted()
                 return
         alignAction("Oval", .3).wait_for_result()
-        depth = rospy.wait_for_message("state/depth", Depth).depth
+        depth = rospy.wait_for_message("odometry/filtered", Odometry).pose.pose.position.z
         if x < 322:
-            moveAction(0, 1.5).wait_for_result()
+            moveAction(0, -1.5).wait_for_result()
             performActions(
-                depthAction(depth + .4),
+                depthAction(depth - .4),
                 moveAction(.7, 0),
             )
-            moveAction(0, -1.5).wait_for_result()
+            moveAction(0, 1.5).wait_for_result()
         else:
-            moveAction(0, -1.5).wait_for_result()
+            moveAction(0, 1.5).wait_for_result()
             performActions(
-                depthAction(depth + .4),
+                depthAction(depth - .4),
                 moveAction(.7, 0),
             )
-            moveAction(0, 1.5).wait_for_result()
+            moveAction(0, -1.5).wait_for_result()
         
         moveAction(-2, 0).wait_for_result()
         
         alignAction("Decap", .3).wait_for_result()
         alignAction("Heart", .3).wait_for_result()
-        depth = rospy.wait_for_message("state/depth", Depth).depth
+        depth = rospy.wait_for_message("odometry/filtered", Odometry).pose.pose.position.z
         performActions(
-            depthAction(depth - .1),
-            moveAction(.8, .3)
+            depthAction(depth + .1),
+            moveAction(.8, -.3)
         )
         if self._as.is_preempt_requested():
                 rospy.loginfo('Preempted Decap Task')
@@ -75,8 +76,8 @@ class DecapTaskAction(object):
         
 
         performActions(
-            depthAction(depth - .1),
-            moveAction(.8, .3)
+            depthAction(depth + .1),
+            moveAction(.8, -.3)
         )
         if self._as.is_preempt_requested():
                 rospy.loginfo('Preempted Decap Task')

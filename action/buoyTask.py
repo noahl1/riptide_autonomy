@@ -3,7 +3,7 @@ import rospy
 import actionlib
 
 from riptide_msgs.msg import LinearCommand, AlignmentCommand
-from sensor_msgs.msg import Imu
+from nav_msgs.msg import Odometry
 import riptide_autonomy.msg
 from tf.transformations import euler_from_quaternion
 
@@ -43,24 +43,24 @@ class BuoyTaskAction(object):
 
         rospy.loginfo("Backing up")
 
-        quat = rospy.wait_for_message("imu/data", Imu).orientation
+        quat = rospy.wait_for_message("odometry/filtered", Odometry).pose.pose.orientation
         quat = [quat.x, quat.y, quat.z, quat.w]
         yaw = euler_from_quaternion(quat)[2] * 180 / math.pi
         if goal.isCutieLeft:
-            moveAction(-0.5, -1.5).wait_for_result()
-            moveAction(3.5, 0).wait_for_result()
-            yawAction(angleAdd(yaw, 180)).wait_for_result()
-            self.yPub.publish(-20, LinearCommand.FORCE)
-        else:
             moveAction(-0.5, 1.5).wait_for_result()
             moveAction(3.5, 0).wait_for_result()
             yawAction(angleAdd(yaw, 180)).wait_for_result()
             self.yPub.publish(20, LinearCommand.FORCE)
+        else:
+            moveAction(-0.5, -1.5).wait_for_result()
+            moveAction(3.5, 0).wait_for_result()
+            yawAction(angleAdd(yaw, 180)).wait_for_result()
+            self.yPub.publish(-20, LinearCommand.FORCE)
         
         waitAction(goal.backside, 5).wait_for_result()
         alignAction(goal.backside, .3).wait_for_result()
         distance = getResult(getDistanceAction(goal.backside)).distance - 0.15
-        moveAction(distance, -.2).wait_for_result()
+        moveAction(distance, .2).wait_for_result()
         if self._as.is_preempt_requested():
             rospy.loginfo('Preempted Buoy Task')
             self._as.set_preempted()
@@ -73,7 +73,7 @@ class BuoyTaskAction(object):
 
         # Back up after finishing task
         moveAction(-2, 0).wait_for_result()
-        depthAction(.5).wait_for_result()
+        depthAction(-.5).wait_for_result()
 
         self._as.set_succeeded()
 

@@ -29,7 +29,7 @@ class ExposeTaskAction(object):
         rospy.loginfo("Start exposing to sunlight task")
         alignAction("Pinger", 0.2).wait_for_result()
 
-        depthAction(1.5).wait_for_result()
+        depthAction(-1.5).wait_for_result()
         moveAction(1, 0).wait_for_result()
 
         self.cameraPub.publish(1)

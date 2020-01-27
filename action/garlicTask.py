@@ -26,7 +26,7 @@ class GarlicTaskAction(object):
         alignAction("Bin", 0.2).wait_for_result()
         moveAction(-.4, 0).wait_for_result()
 
-        pitchAction(-70).wait_for_result()
+        pitchAction(70).wait_for_result()
         self.xPub.publish(30, LinearCommand.FORCE)
         rospy.sleep(0.4)
         self.xPub.publish(-30, LinearCommand.FORCE)
