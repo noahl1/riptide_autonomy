@@ -3,7 +3,7 @@ import rospy
 import actionlib
 import dynamic_reconfigure.client
 
-from riptide_msgs.msg import DepthCommand, AttitudeCommand, AlignmentCommand, Imu, Object, ControlStatusLinear, SwitchState, Depth
+from riptide_msgs.msg import DepthCommand, AttitudeCommand, AlignmentCommand, Object, ControlStatusLinear, SwitchState, Depth
 from geometry_msgs.msg import Vector3Stamped, Point
 from std_msgs.msg import Float32, Float64
 import riptide_autonomy.msg

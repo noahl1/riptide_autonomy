@@ -33,8 +33,7 @@ class Search(object):
         self._as.start()
         self.timer = rospy.Timer(rospy.Duration(0.05), lambda _: checkPreempted(self._as))
 
-    def imuToEuler(self, msg):
-        quat = msg.orientation
+    def quatToEuler(self, quat):
         quat = [quat.x, quat.y, quat.z, quat.w]
         return np.array(euler_from_quaternion(quat)) * 180 / math.pi
 
@@ -52,7 +51,7 @@ class Search(object):
         
 
         odomSub.unregister()
-        y = self.imuToEuler(rospy.wait_for_message("odometry/filtered", Odometry).pose.pose.orientation)[2]
+        y = self.quatToEuler(rospy.wait_for_message("odometry/filtered", Odometry).pose.pose.orientation)[2]
         self.yawPub.publish(y, AttitudeCommand.POSITION)
         self.xPub.publish(0, LinearCommand.FORCE)
         self.yPub.publish(0, LinearCommand.FORCE)
@@ -61,7 +60,7 @@ class Search(object):
         self._as.set_succeeded()
 
     def odomCb(self, msg):
-        euler = self.imuToEuler(msg.pose.pose.orientation)
+        euler = self.quatToEuler(msg.pose.pose.orientation)
         self.position = 20 * math.sin(math.pi / 3 * (time.time() - self.startTime))
         if self.camera == 0:
             self.yawPub.publish(angleDiff(self.position, -self.start_ang), AttitudeCommand.POSITION)

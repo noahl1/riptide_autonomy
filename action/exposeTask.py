@@ -4,7 +4,7 @@ import actionlib
 
 import riptide_controllers.msg
 import riptide_autonomy.msg
-from riptide_msgs.msg import Imu, LinearCommand, AttitudeCommand
+from riptide_msgs.msg import LinearCommand, AttitudeCommand
 from std_msgs.msg import Int8
 
 from actionTools import *
